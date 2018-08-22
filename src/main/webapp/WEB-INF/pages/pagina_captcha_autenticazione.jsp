@@ -1,39 +1,31 @@
 <!DOCTYPE HTML>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <title>Autenticazione-Uni</title>
+    <title>SCRS Progetto</title>
+    <link href="${pageContext.request.contextPath}/resources/css/bootstrap.min.css"  rel="stylesheet" type="text/css" media="all">
+    <link href="${pageContext.request.contextPath}/resources/css/signin.css" rel="stylesheet" type="text/css" media="all">
+    <link href="${pageContext.request.contextPath}/resources/css/custom.css" rel="stylesheet" type="text/css" media="all">
+
+    <script src="${pageContext.request.contextPath}/resources/js/jquery-3.3.1.slim.min.js"> </script>
+    <script src="${pageContext.request.contextPath}/resources/js/bootstrap.min.js"> </script>
+    <script src="${pageContext.request.contextPath}/resources/js/popper.min.js"> </script>
+
 </head>
 <body>
-    <h2>Pagina Captcha</h2>
-    <div id="welcomeTextDiv">
-        <span id="btnText" style="padding-left: 24px;">Inserimento captcha</span>
-        <div id="redirectBtnTable" style="padding: 23px 0px 0px 35px;">
-                
-            <form:form id="registrationForm" action="verificaCredenzialiAccesso" method="GET">
-            
-             <br>
-             <b>Pin</b>
-             <input name="captchaPin" type="text" value="" size="40" maxlength="200" />
-             <br>
-            
-            <br>
-            <br>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <input id="redirectBtn" type="submit" value="Effettua Autenticazione" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </form:form>
- 
-            
-        </div>
-    </div>
+
+<div class="container">
+    <form:form id="registrationForm" action="verificaCredenzialiAccesso" method="GET">
+        <h2 class="form-signin-heading">Registrazione Captcha</h2>
+        <label class="sr-only">Inserimento Captcha</label>
+        <label for="captchaPin" class="sr-only">Pin</label>
+        <input class="form-control" id="captchaPin" name="captchaPin" type="text" value="" required placeholder="Pin" />
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Effettua registrazione</button>
+    </form:form>
+</div>
+
 </body>
 </html>

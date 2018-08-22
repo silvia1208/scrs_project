@@ -1,0 +1,20 @@
+body {
+    background: url("../img/security.jpg");
+}
+
+.form-signin-heading {
+    color: white;
+}
+
+.register-button{
+    color: black;
+    font-weight: bold;
+}
+
+#link-register{
+    color: black;
+}
+
+.form-signin-heading{
+    text-align: center;
+}
