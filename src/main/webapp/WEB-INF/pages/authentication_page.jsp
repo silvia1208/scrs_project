@@ -19,7 +19,7 @@
 
         <div class="container">
             <form:form id="redirectionForm" action="autenticazione" method="GET" class="form-signin">
-                <h2 class="form-signin-heading">Autenticazione </h2>
+                <h2 class="form-signin-heading">Autenticazione</h2>
                 <label for="domain" class="sr-only">Dominio</label>
                 <input  class="form-control" id="domain" name="Dominio" type="text" value="" placeholder="Dominio" required autofocus />
                 <label for="user" class="sr-only">Username</label>
