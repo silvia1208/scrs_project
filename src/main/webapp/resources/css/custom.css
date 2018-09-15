@@ -18,3 +18,51 @@ body {
 .form-signin-heading{
     text-align: center;
 }
+
+#popup-authentication{
+    display: none;
+}
+
+#captcha-container{
+    width: 320px;
+    height: 320px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#captcha-authentication{
+    width: 320px;
+    height: 320px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#first-step button {
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+#pointer_div{
+     background-repeat: no-repeat;
+     width: 320px;
+     height: 320px;
+ }
+
+.form-signin input {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.form-signin table {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.form-signin button {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#error{
+    display: none;
+}
