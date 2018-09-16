@@ -110,6 +110,7 @@
             }
         }
     </script>
+    <title>SCRS - Autenticazione</title>
 </head>
 <body>
 <div class="container">
@@ -135,14 +136,14 @@
                 <table align="center">
                     <tr>
                         <td>
-                            <div id="pointer_div" onclick="point_it(event, 0)" style="margin-right:auto; margin-left:auto; background-position: center; width: 320px; height: 320px; background-image: url(/resources/img/captcha/${capthcha_image}.gif)"> </div>
+                            <div id="pointer_div" onclick="point_it(event, 0)" style="margin-right:auto; margin-left:auto; background-position: center; width: 320px; height: 320px; background-image: url(${pageContext.request.contextPath}/resources/img/captcha/${capthcha_image}.gif)"> </div>
                         </td>
                     </tr>
                 </table>
                 <button  onclick="check_codice(codice)" class="btn btn-lg btn-primary btn-block" type="submit">
                     Accedi  <span class="glyphicon glyphicon-arrow-right"></span>
                 </button>
-                <a href="/registrazione">
+                <a href="/scrsproject/registrazione">
                     <button type="button" class="btn btn-lg btn-primary btn-block">
                         Registrati  <span class="glyphicon glyphicon-pencil"></span>
                     </button>
@@ -150,7 +151,7 @@
                 </div>
                 <div id="success-div">
                     <div id="success-info" class="alert alert-success" role="alert"></div>
-                    <a href="/authentication">
+                    <a href="/scrsproject/authentication">
                         <button type="button" class="btn btn-lg btn-primary btn-block">
                             Torna indietro  <span class="glyphicon glyphicon-arrow-left"></span>
                         </button>

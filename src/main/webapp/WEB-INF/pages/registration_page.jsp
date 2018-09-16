@@ -105,6 +105,7 @@
             }
         }
     </script>
+    <title>SCRS - Registrazione</title>
 </head>
 <body>
 <div class="container">
@@ -131,7 +132,7 @@
                 <table align="center">
                     <tr>
                         <td>
-                            <div id="pointer_div" onclick="point_it(event, 0)" style="margin-right:auto; margin-left:auto; background-position: center; width: 320px; height: 320px; background-image: url(/resources/img/captcha/${capthcha_image}.gif)"> </div>
+                            <div id="pointer_div" onclick="point_it(event, 0)" style="margin-right:auto; margin-left:auto; background-position: center; width: 320px; height: 320px; background-image: url(${pageContext.request.contextPath}/resources/img/captcha/${capthcha_image}.gif)"> </div>
                         </td>
                     </tr>
                 </table>

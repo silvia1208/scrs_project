@@ -59,7 +59,7 @@ function registrati(codice){
         dataType: 'json',
         success : function(response) {
             if(response.status =='correct'){
-                  window.location.href="http://localhost:8080/authentication"
+                  window.location.href="http://localhost:8080/scrsproject/authentication"
             }else{
                 document.getElementById("error").style.display="block";
                 document.getElementById('error').innerHTML = response.status;
