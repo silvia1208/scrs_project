@@ -42,12 +42,13 @@ public class CaptchaController {
      * @param model
      * @return
      */
-    @RequestMapping(value = "/authentication", method = RequestMethod.GET)
+    @RequestMapping(value = {"/authentication","/"}, method = RequestMethod.GET)
     public String authentication(String capthcha_image, Model model ) {
 
         //Stringa contenente id della figura
         String capthcaIdentifier = estrazioneNomeFileCaptcha();
 
+        //Stringa che gestisce il contenuto del captcha
         String valueImage = "";
         try {
             InputStream is = getClass().getResourceAsStream("/"+capthcaIdentifier+".txt");
@@ -71,7 +72,6 @@ public class CaptchaController {
      * @param dominio
      * @param username
      * @param captchaPin
-     * @param passwordInserita
      * @param msg
      * @param model
      * @param request
@@ -79,7 +79,7 @@ public class CaptchaController {
      * @throws Exception
      */
     @RequestMapping(value = "/verificaCredenzialiAccesso", method = RequestMethod.POST)
-    public @ResponseBody ResponseAuthentication verificaCredenzialiAccesso(@RequestParam("Dominio")String dominio, @RequestParam("Username")String username, @RequestParam("captchaPin")String captchaPin, @RequestParam("Password")String passwordInserita, String msg, Model model, HttpServletRequest request ) throws Exception {
+    public @ResponseBody ResponseAuthentication verificaCredenzialiAccesso(@RequestParam("Dominio")String dominio, @RequestParam("Username")String username, @RequestParam("captchaPin")String captchaPin, String msg, Model model, HttpServletRequest request ) throws Exception {
 
         //HttpSession session = request.getSession();
         //Properties properties = new Properties();
@@ -95,18 +95,11 @@ public class CaptchaController {
         String KeyCifratura = codificaStringa(encodedhash);
         System.out.println("La KEYcifratura in fase di autenticazione è: " + KeyCifratura);
 
-        //modifica 26/08
         String indice = Base64.getEncoder().encodeToString(encodedhash);
-
 
         //leggo il file per scoprire le credenziali di accesso
         InputStream is = getClass().getResourceAsStream("/credenziali.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-        //da gestire questo reader
-
-        //while((reader.readLine())!=null){
-
 
 
         for (String str = reader.readLine(); str != null; str = reader.readLine()) {
@@ -124,53 +117,15 @@ public class CaptchaController {
 
             //if(stringaDaConfrontare.equals(KeyCifratura)){
 
-            //modifica 26/08
             if(stringaDaConfrontare.equals(indice)){
 
-                //passwordCodificataNelFile = str.substring(33,str.length());
-
-                //modifica 26/08
                 passwordCodificataNelFile = str.substring(str.indexOf(" ")+1,str.length());
 
                 byte[] decoded = Base64.getDecoder().decode(passwordCodificataNelFile);
                 String password = decrypt(decoded  , KeyCifratura);
                 System.out.println("Il valore della password criptata nel file è :" + password);
 
-                //qua dovremmo rimandare ad una pagina che ci fa vedere a video la password
-
-                //inserito nel momento in cui abbiamo inserito la password nella jsp
-
-                if(password.equals(passwordInserita)){
-                   // return "redirect:https://www.google.com/";
-
-                    return new ResponseAuthentication(dominio,"correct");
-                }else{
-                   // model.addAttribute("messaggio", "Password errata");
-
-                    //devo ripassare il numero casuale per nuovo inserimento captcha
-                    //creare funzione random
-                    Random random = new Random();
-
-                    //generazione di un numero casuale tra 0 e 4999
-                    int k = random.nextInt(4999);
-
-                    String number =Integer.toString(k);
-                    //generazione di una stringa per il richiamo di un identificativo della gif
-                    String mtfa = "mtfa_00";
-                    number=mtfa.concat(number);
-
-                    msg = number;
-                    model.addAttribute("msg", msg);
-
-                 //   return "authentication_page";
-
-                    return new ResponseAuthentication(dominio,"wrong");
-                }
-
-
-                //msg = password;
-                // model.addAttribute("msg", msg);
-                // return "visualizzazione_password";
+                return new ResponseAuthentication(dominio,password,"correct");
             }
 
 
@@ -178,62 +133,15 @@ public class CaptchaController {
 
         reader.close();
 
-
-//
-//        //in caso di errore
-//        Random random = new Random();
-//
-//        //generazione di un numero casuale tra 0 e 4999
-//        int k = random.nextInt(4999);
-//
-//        String number =Integer.toString(k);
-//        //generazione di una stringa per il richiamo di un identificativo della gif
-//        String mtfa = "mtfa_00";
-//        number=mtfa.concat(number);
-//
-//        msg = number;
-//    //    model.addAttribute("msg", msg);
-//
-//    //    model.addAttribute("messaggio", "credenziali di accesso errate");
-//    //    return "authentication_page";
-       return  new ResponseAuthentication(dominio,"wrong");
+       return  new ResponseAuthentication(dominio,"","wrong");
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @RequestMapping(value = "/autenticazione", method = RequestMethod.GET)
-    public String autenticazione( @RequestParam("Dominio")String dominio, @RequestParam("Username")String username, @RequestParam("captcha") String captcha, Model model, HttpServletRequest request ) throws IOException, URISyntaxException, NoSuchAlgorithmException  {
-        System.out.println("Redirecting Result To The Final Page");
-
-        //salva in sessione il dominio e l'username e porta alla pagina del captcha
-
-        HttpSession session = request.getSession();
-
-        session.setAttribute("dominio", dominio);
-        session.setAttribute("username", username);
-
-
-
-
-        return "pagina_captcha_autenticazione";
-
-    }
-
-
-
-
-
+    /**
+     * Visualizzazione della pagina di registrazione
+     * @param model
+     * @return
+     * @throws IOException
+     */
     @RequestMapping(value = "/registrazione", method = RequestMethod.GET)
     public String indirizzaPaginaRegistrazione( Model model ) throws IOException {
 
@@ -260,38 +168,10 @@ public class CaptchaController {
         return "registration_page";
     }
 
-
-
-
-
-    @RequestMapping(value = "/redirectAuthentication", method = RequestMethod.GET)
-    public String redirectAuthentication(String msg, Model model ) throws IOException {
-        System.out.println("Sto indirizzando alla registrazione");
-
-
-        String nomeFileCaptcha = estrazioneNomeFileCaptcha();
-
-        String stringaCaptcha = new String();
-
-        InputStream is = getClass().getResourceAsStream(nomeFileCaptcha);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-        for (String str = reader.readLine(); str != null; str = reader.readLine()) {
-
-            stringaCaptcha = stringaCaptcha + str;
-
-        }
-
-
-        model.addAttribute("nomeFileCaptcha", nomeFileCaptcha);
-        model.addAttribute("contenutoFileCaptcha", stringaCaptcha);
-
-
-        return "authentication_page";
-    }
-
-
-    //funzione
+    /**
+     * Metodo per la gestione della selezione randomica della figura
+     * @return
+     */
     public String estrazioneNomeFileCaptcha(){
 
         //creare funzione random
@@ -300,31 +180,23 @@ public class CaptchaController {
         //generazione di un numero casuale tra 0 e 4999
         int k = random.nextInt(4999);
 
+
         String number =Integer.toString(k);
 
-        //qua devi fare uscire un numero con tanti zeri iniziali quante sono le cifre che mancano
-        // a comporre un numero di 4 cifre
-
-        switch(number.length()){
-
-            case 1:
-                number = "000"+number;
-
-            case 2:
-                number = "00"+number;
-
-            case 3:
-                number = "0"+number;
-
-            default:
-                System.out.println("il numero generato ha 4 cifre");
+        if(number.length()==1){
+            number="000"+number;
+        }else{
+            if(number.length()==2){
+                number="00"+number;
+            }else{
+                if(number.length()==3){
+                    number="0"+number;
+                }
+            }
         }
 
         //generazione di una stringa per il richiamo di un identificativo della gif
-       // String slash = "/";
         String mtfa = "mtfa_00";
-       // String estensione = ".txt";
-      //  String nomefileCaptcha = slash +mtfa+ number+estensione;
         String nomefileCaptcha = mtfa + number;
         System.out.println("Il file captcha cercato: " + nomefileCaptcha);
 
@@ -332,14 +204,20 @@ public class CaptchaController {
     }
 
 
-
-
-
-
-
-
-    @RequestMapping(value = "/creaPasswordCifrata", method = RequestMethod.GET)
-    public String creaPasswordCifrata(@RequestParam("dominio")String dominio, @RequestParam("username")String username,@RequestParam("password")String password,@RequestParam("captchaPin")String captchaPin, String msg, Model model,HttpServletRequest request) throws Exception  {
+    /**
+     * Metodo per la gestione della registrazione dell'utente
+     * @param dominio
+     * @param username
+     * @param password
+     * @param captchaPin
+     * @param msg
+     * @param model
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/creaPasswordCifrata", method = RequestMethod.POST)
+    public @ResponseBody ResponseAuthentication/*String*/ creaPasswordCifrata(@RequestParam("dominio")String dominio, @RequestParam("username")String username,@RequestParam("password")String password,@RequestParam("captchaPin")String captchaPin, String msg, Model model,HttpServletRequest request) throws Exception  {
 
         HttpSession session = request.getSession();
 
@@ -388,18 +266,10 @@ public class CaptchaController {
 
             System.out.println("dominioUsername   "+ dominioUsername);
             System.out.println("str               "+ str);
+
             if(dominioUsername.equals(str)){
-                msg = "Registrazione NON EFFETTUATA dominio e username precedentemente registrati";
-
-                model.addAttribute("msg", msg);
-                return "registrazione_effettuata";
+                return new ResponseAuthentication(dominio,password,"Dominio e username già presenti nel sistema");
             }
-
-
-            //se stai valutando la stringa con solo dominio e username devi gestire
-            //l'errore di str.indexOf(" ")-1
-
-
 
             String stringaDaConfrontare=str.substring(0,str.indexOf(" ")-1);
             String indice = Base64.getEncoder().encodeToString(encodedhash);
@@ -411,12 +281,7 @@ public class CaptchaController {
             if(stringaDaConfrontare.equals(indice)){
 
                 //restituisci un messaggio con scritto che esiste già un account con le seguenti credenziali
-
-
-                msg = "Registrazione NON effettuata";
-
-                model.addAttribute("msg", msg);
-                return "registrazione_effettuata";
+                return new ResponseAuthentication(dominio,password,"Dominio e username e Pin già presenti nel sistema");
 
             }
 
@@ -471,48 +336,9 @@ public class CaptchaController {
 
 
 
-
-        msg = "Registrazione effettuata";
-
-        model.addAttribute("msg", msg);
-        return "registrazione_effettuata";
+         return  new ResponseAuthentication(dominio,password,"correct");
     }
 
-
-
-
-
-
-
-
-
-
-    @RequestMapping(value = "/esegui_registrazione", method = RequestMethod.GET)
-    public String registrazione(@RequestParam("dominio")String dominio, @RequestParam("username")String username,@RequestParam("password")String password, String msg, Model model,HttpServletRequest request) throws IOException, URISyntaxException, NoSuchAlgorithmException  {
-
-
-
-
-        //inserisci qui la funzione random per la creazione del numero casuale
-        //creare funzione random
-        Random random = new Random();
-
-        //generazione di un numero casuale tra 0 e 4999
-        int k = random.nextInt(4999);
-
-        String number =Integer.toString(k);
-        //generazione di una stringa per il richiamo di un identificativo della gif
-        String mtfa = "mtfa_00";
-        number=mtfa.concat(number);
-
-        msg = number;
-        model.addAttribute("msg", msg);
-
-        model.addAttribute("messaggio", "prova");
-
-        return "registration_page";
-
-    }
 
 
 

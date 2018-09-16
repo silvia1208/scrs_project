@@ -29,20 +29,24 @@
         var vCodici;
         var posCerchi;
 
-        function trim(str) {
-            var newstr;
-            newstr = str.replace(/^\s*/, "").replace(/\s*$/, "");
-            newstr = newstr.replace(/\s{2,}/, " ");
-            return newstr;
-        }
-
         $(document).ready(function () {
             start();
+            var domain = getCookie("domain");
+            var username = getCookie("username");
+            if(domain){
+                document.getElementById("domain").value=domain;
+            }
+            if(username){
+                document.getElementById("user").value = username;
+            }
         });
 
         function start() {
+
+            //Inizializza oggetto per la gestione del captcha
             captcha = Raphael(document.getElementById('pointer_div'), 320, 320);
 
+            //Imposta le dimensioni di una cella dividendo la grandezza del captcha per il numero di celle
             dim = (320.0 / 6.0);
             pos = 0;
 
@@ -57,54 +61,54 @@
         }
         ;
 
-        function Set_Cookie(name, value, expires, path, domain, secure) {
-            var today = new Date();
-            today.setTime(today.getTime());
-            if (expires) {
-                expires = expires * 1000 * 60 * 60 * 24;
-            }
-            var expires_date = new Date(today.getTime() + (expires));
-
-            document.cookie = name + "=" + escape(value) +
-                ((expires) ? ";expires=" + expires_date.toGMTString() : "") +
-                ((path) ? ";path=" + path : "") +
-                ((domain) ? ";domain=" + domain : "") +
-                ((secure) ? ";secure" : "");
-        }
-
-        function Delete_Cookie(name, path, domain) {
-            if (Get_Cookie(name))
-                document.cookie = name + "=" +
-                    ((path) ? ";path=" + path : "") +
-                    ((domain) ? ";domain=" + domain : "") +
-                    ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
-        }
-
-        function Get_Cookie(check_name) {
-            var a_all_cookies = document.cookie.split(';');
-            var a_temp_cookie = '';
-            var cookie_name = '';
-            var cookie_value = '';
-            var b_cookie_found = false;
-
-            for (i = 0; i < a_all_cookies.length; i++) {
-                a_temp_cookie = a_all_cookies[i].split('=');
-                cookie_name = a_temp_cookie[0].replace(/^\s+|\s+$/g, '');
-                if (cookie_name === check_name) {
-                    b_cookie_found = true;
-                    if (a_temp_cookie.length > 1) {
-                        cookie_value = unescape(a_temp_cookie[1].replace(/^\s+|\s+$/g, ''));
-                    }
-                    return cookie_value;
-                    break;
-                }
-                a_temp_cookie = null;
-                cookie_name = '';
-            }
-            if (!b_cookie_found) {
-                return null;
-            }
-        }
+        // function Set_Cookie(name, value, expires, path, domain, secure) {
+        //     var today = new Date();
+        //     today.setTime(today.getTime());
+        //     if (expires) {
+        //         expires = expires * 1000 * 60 * 60 * 24;
+        //     }
+        //     var expires_date = new Date(today.getTime() + (expires));
+        //
+        //     document.cookie = name + "=" + escape(value) +
+        //         ((expires) ? ";expires=" + expires_date.toGMTString() : "") +
+        //         ((path) ? ";path=" + path : "") +
+        //         ((domain) ? ";domain=" + domain : "") +
+        //         ((secure) ? ";secure" : "");
+        // }
+        //
+        // function Delete_Cookie(name, path, domain) {
+        //     if (Get_Cookie(name))
+        //         document.cookie = name + "=" +
+        //             ((path) ? ";path=" + path : "") +
+        //             ((domain) ? ";domain=" + domain : "") +
+        //             ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+        // }
+        //
+        // function Get_Cookie(check_name) {
+        //     var a_all_cookies = document.cookie.split(';');
+        //     var a_temp_cookie = '';
+        //     var cookie_name = '';
+        //     var cookie_value = '';
+        //     var b_cookie_found = false;
+        //
+        //     for (i = 0; i < a_all_cookies.length; i++) {
+        //         a_temp_cookie = a_all_cookies[i].split('=');
+        //         cookie_name = a_temp_cookie[0].replace(/^\s+|\s+$/g, '');
+        //         if (cookie_name === check_name) {
+        //             b_cookie_found = true;
+        //             if (a_temp_cookie.length > 1) {
+        //                 cookie_value = unescape(a_temp_cookie[1].replace(/^\s+|\s+$/g, ''));
+        //             }
+        //             return cookie_value;
+        //             break;
+        //         }
+        //         a_temp_cookie = null;
+        //         cookie_name = '';
+        //     }
+        //     if (!b_cookie_found) {
+        //         return null;
+        //     }
+        // }
 
         /**
          * Funzione per gestire gli eventi all'interno dell'immagine
@@ -175,8 +179,8 @@
                 <input  class="form-control" id="domain" name="Dominio" type="text" value="" placeholder="Dominio" required autofocus />
                 <label for="user" class="sr-only">Username</label>
                 <input class="form-control" id="user" name="Username" type="text" value="" required placeholder="Username" />
-                <label for="password" class="sr-only">Password</label>
-                <input class="form-control" id="password" name="Password" type="password" value="" required placeholder="Password" />
+                <%--<label for="password" class="sr-only">Password</label>--%>
+                <%--<input class="form-control" id="password" name="Password" type="password" value="" required placeholder="Password" />--%>
                 <button type="button" class="btn btn-default" onclick="delete_last_number()">
                     <span class="glyphicon glyphicon-trash"></span> Delete
                 </button>
@@ -197,15 +201,6 @@
         </div>
 
     </div>
-    <%--<div class="row">--%>
-        <%--<div class="col-md-12">--%>
-            <%--<div class="register-button alert alert-secondary">--%>
-                <%--<form id="registrationForm" action="registrazione" method="GET">--%>
-                    <%--Non hai un account? <button id="link-register" class="btn btn-link" type="submit">Registrati</button>--%>
-                <%--</form>--%>
-            <%--</div>--%>
-        <%--</div>--%>
-    <%--</div>--%>
 
 </div>
 </body>
