@@ -66,3 +66,11 @@ body {
 #error{
     display: none;
 }
+
+#success-div{
+    display: none;
+}
+
+.boldText {
+    font-weight: bold;
+}

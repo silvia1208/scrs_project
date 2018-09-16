@@ -1,7 +1,8 @@
-
-/*Call ajax for  go back*/
+/**
+ * Funzione che controlla se il pin è composto da 6 cifre
+ * @param codice
+ */
 function check_codice(codice){
-    alert(codice.length)
     if(codice.length==6){
        check_authentication(codice)
     }else{
@@ -9,30 +10,32 @@ function check_codice(codice){
     }
 }
 
+/**
+ * Funzione per effettuare la chiamata per l'autenticazione
+ * @param codice
+ */
 function check_authentication(codice){
     var domain = document.getElementById("domain").value;
     var username = document.getElementById("user").value;
- //   var password = document.getElementById("password").value;
 
+    //Imposta nei cookie i valori inseriti dall'utente per dominio e username
     setCookie("domain",domain,3);
     setCookie("username",username,3);
 
-    alert('Chiamata per autenticazione: '+domain+username+codice)
     $.ajax({
         type : "POST",
         url : "verificaCredenzialiAccesso",
         data : "Dominio=" + domain + "&Username=" + username+"&captchaPin="+codice,
         dataType: 'json',
         success : function(response) {
-            alert(response.status);
             if(response.status =='correct'){
-             //   window.location.href="http://www.google.it"
-                document.getElementById("error").style.display="block";
-                document.getElementById('error').innerHTML = '<br>' + response.password;
+                document.getElementById("error").style.display="none";
+                document.getElementById("gestore-captcha").style.display="none";
+                document.getElementById("success-div").style.display="block";
+                document.getElementById('success-info').innerHTML = '<br> La password per accedere al dominio richiesto &egrave;:  <span class="boldText">' + response.password + '</span>';
             }else{
                 document.getElementById("error").style.display="block";
-                document.getElementById('error').innerHTML = '<br> Si &egrave; verificato un problema in fase di autenticazione';
-                alert('Si è verificato un problema in fase di autenticazione')
+                document.getElementById('error').innerHTML = '<br> I dati inseriti non sono presenti nel sistema';
             }
 
         },
@@ -42,27 +45,24 @@ function check_authentication(codice){
     });
 }
 
+/**
+ * Effettua la chiamata per la registrazione dei dati inseriti dall'utente
+ */
 function registrati(codice){
     var domain = document.getElementById("domain").value;
     var username = document.getElementById("user").value;
     var password = document.getElementById("password").value;
-    alert('Chiamata per autenticazione: '+domain+username+codice)
     $.ajax({
         type : "POST",
         url : "creaPasswordCifrata",
         data : "dominio=" + domain + "&username=" + username+"&password="+password+"&captchaPin="+codice,
         dataType: 'json',
         success : function(response) {
-            alert(response.status);
             if(response.status =='correct'){
-                 alert("registrazione a buon fine")
                   window.location.href="http://localhost:8080/authentication"
-             //   document.getElementById("error").style.display="block";
-             //   document.getElementById('error').innerHTML = '<br>' + response.password;
             }else{
                 document.getElementById("error").style.display="block";
-                document.getElementById('error').innerHTML = '<br> Si &egrave; verificato un problema in fase di autenticazione';
-                alert('Si è verificato un problema in fase di autenticazione')
+                document.getElementById('error').innerHTML = response.status;
             }
 
         },
@@ -72,6 +72,9 @@ function registrati(codice){
     });
 }
 
+/**
+ * Imposta il valore del parametro all'interno dei cookie
+ */
 function setCookie(name,value,days) {
     var expires = "";
     if (days) {
@@ -81,6 +84,12 @@ function setCookie(name,value,days) {
     }
     document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
+
+/**
+ * Estrae il valore del parametro richiesto dai cookie
+ * @param name
+ * @returns {*}
+ */
 function getCookie(name) {
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
@@ -90,4 +99,12 @@ function getCookie(name) {
         if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
     }
     return null;
+}
+
+/**
+ * Controlla la configurazione dei div visualizzati nella pagina
+ */
+function check_configuration() {
+    document.getElementById("gestore-captcha").style.display="block";
+    document.getElementById("success-div").style.display="none";
 }
