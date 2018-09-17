@@ -3,10 +3,10 @@
  * @param codice
  */
 function check_codice(codice){
-    if(codice.length==6){
+    if(codice.length==6 && document.getElementById('domain').validity.valid && document.getElementById('user').validity.valid){
        check_authentication(codice)
     }else{
-        alert('Il codice deve essere composto da 6 cifre')
+        alert('Inserire correttamente i parametri richiesti')
     }
 }
 
@@ -49,27 +49,38 @@ function check_authentication(codice){
  * Effettua la chiamata per la registrazione dei dati inseriti dall'utente
  */
 function registrati(codice){
-    var domain = document.getElementById("domain").value;
-    var username = document.getElementById("user").value;
-    var password = document.getElementById("password").value;
-    $.ajax({
-        type : "POST",
-        url : "creaPasswordCifrata",
-        data : "dominio=" + domain + "&username=" + username+"&password="+password+"&captchaPin="+codice,
-        dataType: 'json',
-        success : function(response) {
-            if(response.status =='correct'){
-                  window.location.href="http://localhost:8080/scrsproject/authentication"
-            }else{
-                document.getElementById("error").style.display="block";
-                document.getElementById('error').innerHTML = response.status;
-            }
 
-        },
-        error : function(e) {
-            alert('Error: ' + e);
-        }
-    });
+    var  check_domain = document.getElementById('domain').validity.valid
+    var check_user = document.getElementById('user').validity.valid
+    var check_password = document.getElementById('password').validity.valid
+    if(codice.length==6 && check_domain && check_user && check_password){
+        var domain = document.getElementById("domain").value;
+        var username = document.getElementById("user").value;
+        var password = document.getElementById("password").value;
+
+
+        $.ajax({
+            type : "POST",
+            url : "creaPasswordCifrata",
+            data : "dominio=" + domain + "&username=" + username+"&password="+password+"&captchaPin="+codice,
+            dataType: 'json',
+            success : function(response) {
+                if(response.status =='correct'){
+                    window.location.href="http://localhost:8080/scrsproject/authentication"
+                }else{
+                    document.getElementById("error").style.display="block";
+                    document.getElementById('error').innerHTML = response.status;
+                }
+
+            },
+            error : function(e) {
+                alert('Error: ' + e);
+            }
+        });
+    }else{
+        alert('Inserire correttamente i parametri richiesti')
+    }
+
 }
 
 /**

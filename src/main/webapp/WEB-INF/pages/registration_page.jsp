@@ -121,11 +121,11 @@
                 <div id="error" class="alert alert-danger" role="alert">
                 </div>
                 <label for="domain" class="sr-only">Dominio</label>
-                <input  class="form-control" id="domain" name="Dominio" type="text" value="" placeholder="Dominio" required autofocus />
+                <input  class="form-control" id="domain" name="Dominio" type="text" value="" placeholder="Dominio" autofocus required/>
                 <label for="user" class="sr-only">Username</label>
-                <input class="form-control" id="user" name="Username" type="text" value="" required placeholder="Username" />
+                <input class="form-control" id="user" name="Username" type="text" value="" placeholder="Username" required />
                 <label for="password" class="sr-only">Password</label>
-                <input class="form-control" id="password" name="Password" type="password" value="" required placeholder="Password" />
+                <input class="form-control" id="password" name="Password" type="password" value="" placeholder="Password"  required/>
                 <button type="button" class="btn btn-lg btn-primary btn-block" onclick="delete_last_number()">
                     Elimina ultimo carattere <span class="glyphicon glyphicon-trash"></span>
                 </button>
