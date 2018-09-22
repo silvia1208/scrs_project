@@ -15,6 +15,8 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Properties;
 import java.util.Random;
+import java.util.*;
+
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -29,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
+import javax.xml.bind.DatatypeConverter;
 /**
  * Controller
  */
@@ -133,7 +135,7 @@ public class CaptchaController {
 
         reader.close();
 
-       return  new ResponseAuthentication(dominio,"","wrong");
+        return  new ResponseAuthentication(dominio,"","wrong");
     }
 
     /**
@@ -219,45 +221,42 @@ public class CaptchaController {
     @RequestMapping(value = "/creaPasswordCifrata", method = RequestMethod.POST)
     public @ResponseBody ResponseAuthentication/*String*/ creaPasswordCifrata(@RequestParam("dominio")String dominio, @RequestParam("username")String username,@RequestParam("password")String password,@RequestParam("captchaPin")String captchaPin, String msg, Model model,HttpServletRequest request) throws Exception  {
 
-        HttpSession session = request.getSession();
 
-
-        //Fai lo sha 256 di dominio+username+pin
-
-        //1) crea la stringa da concatenare
+        //concatenazione username dominio e pin nella stringa dominioUsernamePin
         dominio = dominio.concat(username);
         System.out.println("Dominio    "+dominio);
 
         String dominioUsernamePin = dominio.concat(captchaPin);
         System.out.println("Dominio    "+dominio);
         System.out.println("dominioUsernamePin    "+dominioUsernamePin);
-        //String dominioUsernamePin = dominio;
 
 
-
-        //il mio sha che devo codificare a livello di stringa per essere indice dell'hashmap
+        //eseguo lo sha256 della stringa dominioUsernamePin
         byte[] encodedhash = hashing256(dominioUsernamePin);
+
+        //creo la chiave di cifratura per la password
         String KeyCifratura = codificaStringa(encodedhash);
 
         System.out.println("La chiave di cifratura è : "+KeyCifratura);
         System.out.println("La password è : "+password);
+
+        //cripto la password con la chiave di cifratura
         byte[] encrypted = encrypt(password, KeyCifratura);
 
-        //tale password cifrata deve essere salvata nel file di testo come:  codificaStringone(hash256)=passwordCriptata
-        //ma prima dobbiamo controllare che per le credenziali di accesso non siano già state salvate
-
-        /*inizio 02/09*/
+        // prima di salvare nel file credenziali.txt il record vettoreSHA = passwordCriptata devo controllare che
+        //non esista gia' un record per il dominio e 'username in questione
         InputStream is = getClass().getResourceAsStream("/credenziali.txt");
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
         for (String str = reader.readLine(); str != null; str = reader.readLine()) {
 
-
-
+            //se la riga e' vuota procedi oltre
             if(str.isEmpty()){continue;}
 
-            //controllo che non si stiano registrando credenziali per lo stesso username e dominio
+            //la variabile dominio contiene dominio e username
             byte[] dominioUsernameHash = hashing256(dominio);
+
+            //cast del dominio in string
             String dominioUsername = Base64.getEncoder().encodeToString(dominioUsernameHash);
 
             //in modo da non far andare in errore String stringaDaConfrontare=str.substring(0,str.indexOf(" ")-1);
@@ -267,17 +266,25 @@ public class CaptchaController {
             System.out.println("dominioUsername   "+ dominioUsername);
             System.out.println("str               "+ str);
 
+            //controllo che non si stiano registrando credenziali per lo stesso username e dominio
+            //in questo caso in fase di registrazione e' stato necessario salvare una striga ottenuta dalla concatenazione di dominio e username
+            //codificata allo stesso modo del vettoreSHA, non potendo sfruttare il vettoreSHA ottenuto anche grazie alla concatenzaione del pin
             if(dominioUsername.equals(str)){
                 return new ResponseAuthentication(dominio,password,"Dominio e username già presenti nel sistema");
             }
 
             String stringaDaConfrontare=str.substring(0,str.indexOf(" ")-1);
+
+            //encodedhash = sha256(dominioUsernamePin) trasformato in string
             String indice = Base64.getEncoder().encodeToString(encodedhash);
 
 
             System.out.println("stringaDaConfrontare: " + stringaDaConfrontare);
             System.out.println("indice: " + indice);
 
+            //controllo che non si stia salvando uno stesso vettoreSHA
+            //quindi che non sia gia' presente una registrazione con stesso dominio username e pin
+            //controllo superfluo
             if(stringaDaConfrontare.equals(indice)){
 
                 //restituisci un messaggio con scritto che esiste già un account con le seguenti credenziali
@@ -287,9 +294,6 @@ public class CaptchaController {
 
 
         }
-        /*fine 02/09*/
-
-
 
 
         File file= new File (this.getClass().getResource("/credenziali.txt").toURI()   );
@@ -300,6 +304,10 @@ public class CaptchaController {
 
             fw = new FileWriter(file,true);
             PrintWriter out = new PrintWriter(fw);
+
+            //siccome il file viene inizializzato con una stringa
+            //allora inserisco
+            out.println("\n");
 
             String uguale = "=";
 
@@ -312,19 +320,24 @@ public class CaptchaController {
 
             //String KeyCifraturaCompleta = KeyCifratura+uguale+encoded;
 
-            //modifica 26/08
+            //encodedhash = sha256(dominioUsernamePin)
             String indice = Base64.getEncoder().encodeToString(encodedhash);
+
+            //encode e' la password criptata
+            //l'indice e' il vettoreSHA
+
             String KeyCifraturaCompleta = indice+uguale+spazio+encoded;
             System.out.println("La KeyCifraturaCompleta:  "+KeyCifraturaCompleta);
 
+            //si salva vettoreSHA = passwordCriptata nel file
             out.append(KeyCifraturaCompleta);
             out.println("\n");
 
             //in tale fase salviamo in sha256 anche la concatenazione di dominio e di username
             //in tal modo possiamo controllare in fase di salvataggio se tali credenziali siano state già salvate
-
             byte[] dominioUsernameHash = hashing256(dominio);
             String dominioUsername = Base64.getEncoder().encodeToString(dominioUsernameHash);
+
             //in modo da non far andare in errore String stringaDaConfrontare=str.substring(0,str.indexOf(" ")-1);
             dominioUsername=dominioUsername+spazio;
             out.append(dominioUsername);
@@ -336,7 +349,7 @@ public class CaptchaController {
 
 
 
-         return  new ResponseAuthentication(dominio,password,"correct");
+        return  new ResponseAuthentication(dominio,password,"correct");
     }
 
 
@@ -399,7 +412,7 @@ public class CaptchaController {
 
 
 
-    public String  codificaStringa(byte [] encodedhash) throws IOException, NoSuchAlgorithmException{
+    public String  codificaStringa(byte [] encodedhash) throws IOException, UnsupportedEncodingException, NoSuchAlgorithmException{
 
 
         char stringa8192[] = new char[8192] ;
@@ -418,17 +431,52 @@ public class CaptchaController {
         reader.close();
 
 
+        //trasforma l'encodedhash in un array di 32 interi compresi in [0,...,255]
+        for(int k=0; k<encodedhash.length; k++){
+            Byte a = encodedhash[k];
+
+            int b = 	a.intValue();
+            System.out.println("Sto stampando il byte: "+ encodedhash[k]);
+        }
+
+        //converto la stringa in esadecimale e ho 64 caratteri
+        String s = DatatypeConverter.printHexBinary(encodedhash);
+        System.out.println("Stringa convertita "+ s);
+
+        //metto la stringa in un array
+        int[] sequenza = new int[32];
+        int j=0;
+
+        for (int i=0; i+1<s.length();i=i+2){
+            char a = s.charAt(i);
+            System.out.println(a);
+
+            char b = s.charAt(i+1);
+            System.out.println(b);
+
+            String primo =Character.toString(a);
+            String secondo = Character.toString(b);
+
+            String concatenata = primo+secondo;
+            int decimal=Integer.parseInt(concatenata,16);
+            System.out.println("Il valore decimal:" + decimal);
+
+
+            sequenza[j] = decimal;
+            j++;
+        }
+
         //3) scorriamo l'array8192 e l'array encodedhash
-        for(int i=0, j=0; i< encodedhash.length && j<stringa8192.length  ; i=i+1,j=j+255) {
+        for(int i=0, p=0; i< sequenza.length && p<stringa8192.length  ; i=i+1,p=p+255) {
 
-            //devi fare il modulo della encodedhash[i] perchè potrebbe essere anche negativo
+            //
+            //devo generare un numero compreso tra 0 e 255
+            int indice = sequenza[i];
 
-            int indice = Math.abs(encodedhash[i]);
-
-
+            System.out.println("prova");
 
             //tale elemento va cocatenato con i valori generati man mano per creare il pin generale
-            char elementoKeyCifrata =stringa8192[j+indice];
+            char elementoKeyCifrata =stringa8192[p+indice];
 
             keyCifrata = keyCifrata.concat(String.valueOf(elementoKeyCifrata));
 
